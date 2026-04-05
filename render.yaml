@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: textshare
+    env: node
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false

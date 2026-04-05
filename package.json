@@ -1,0 +1,26 @@
+{
+  "name": "textshare",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:push": "drizzle-kit push",
+    "dev": "node --watch backend/index.js",
+    "start": "node backend/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.31.0",
+  "dependencies": {
+    "dotenv": "^17.4.0",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "postgres": "^3.4.8"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
+  }
+}

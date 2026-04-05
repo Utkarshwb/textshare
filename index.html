@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TextShare</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000000;
+      --pink: #f97316;
+      --pink-dim: rgba(249,115,22,0.18);
+      --pink-border: rgba(249,115,22,0.25);
+      --pink-glow: rgba(249,115,22,0.08);
+      --white: #f5f5f5;
+      --dim: rgba(245,245,245,0.3);
+      --border: rgba(245,245,245,0.1);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      font-size: 125%;
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* nebula bg */
+    .bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: #050505;
+    }
+
+    /* full viewport grid */
+    .shell {
+      position: relative; z-index: 1;
+      width: 100%; height: 100vh;
+      display: grid;
+      grid-template-rows: 57px 1fr 48px;
+    }
+
+    /* ── top bar ── */
+    .top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px;
+      border-bottom: 1px solid var(--border);
+      opacity: 0; animation: up .5s ease .05s forwards;
+    }
+
+    .wordmark {
+      font-size: 0.82rem; letter-spacing: 5px; text-transform: uppercase;
+      font-weight: 600;
+      color: var(--dim);
+    }
+    .wordmark b { color: var(--pink); font-weight: 700; }
+
+    .hint { font-size: 0.58rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+
+    /* ── center ── */
+    .center {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 36px;
+      opacity: 0; animation: up .5s ease .13s forwards;
+    }
+
+    .card {
+      width: 100%; max-width: 620px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    /* textarea section */
+    .card-body {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    textarea {
+      width: 100%; height: 38vh;
+      background: transparent; border: none; outline: none; resize: none;
+      color: var(--white);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.86rem; line-height: 1.85;
+      caret-color: var(--pink);
+    }
+    textarea::placeholder { color: rgba(245,245,245,0.18); font-style: italic; }
+
+    /* bottom row inside card */
+    .card-footer {
+      display: flex; align-items: center; gap: 0;
+    }
+
+    .slug-wrap {
+      display: flex; align-items: center; gap: 0;
+      flex: 1; border-right: 1px solid var(--border);
+      padding: 0 20px; height: 52px;
+    }
+
+    .slug-label {
+      font-size: 0.65rem; color: var(--dim);
+      white-space: nowrap; letter-spacing: 1px;
+      margin-right: 6px;
+    }
+    .slug-label b { color: var(--pink); font-weight: 400; }
+
+    input[type="text"] {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--white); font-family: 'DM Mono', monospace;
+      font-size: 0.82rem; caret-color: var(--pink);
+      letter-spacing: 0.5px;
+    }
+    input[type="text"]::placeholder { color: rgba(245,245,245,0.18); }
+
+    .share-btn {
+      height: 52px; padding: 0 28px;
+      background: none; border: none; cursor: pointer;
+      color: var(--dim); font-family: 'DM Mono', monospace;
+      font-size: 0.64rem; letter-spacing: 3px; text-transform: uppercase;
+      transition: color .2s, background .2s;
+      white-space: nowrap;
+      border-left: 1px solid var(--border);
+    }
+    .share-btn:hover { color: var(--pink); background: var(--pink-glow); }
+    .share-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* feedback */
+    .fb {
+      max-width: 620px; width: 100%;
+      margin-top: 14px;
+      font-size: 0.67rem; letter-spacing: 1px;
+      min-height: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      opacity: 0; transition: opacity .25s;
+      padding: 0 4px;
+    }
+    .fb.show { opacity: 1; }
+    .fb.ok  { color: var(--pink); }
+    .fb.err { color: #f87171; }
+
+    .copy-btn {
+      background: none; border: none; cursor: pointer;
+      color: inherit; font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: underline; text-underline-offset: 3px; opacity: .7;
+      transition: opacity .15s;
+    }
+    .copy-btn:hover { opacity: 1; }
+
+    /* ── footer ── */
+    .foot {
+      display: flex; align-items: center; justify-content: center;
+      border-top: 1px solid var(--border);
+      font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(245,245,245,0.45);
+      opacity: 0; animation: up .5s ease .22s forwards;
+    }
+    .foot span { color: var(--pink); margin: 0 4px; }
+
+    @keyframes up {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+
+<div class="shell">
+
+  <div class="top">
+    <div class="wordmark">Text<b>Share</b></div>
+    <div class="hint">ctrl + enter to share</div>
+  </div>
+
+  <div class="center">
+    <div style="width:100%;max-width:620px;display:flex;flex-direction:column">
+      <div class="card">
+        <div class="card-body">
+          <textarea id="content" placeholder="paste anything — text, markdown, ai reply, code..."></textarea>
+        </div>
+        <div class="card-footer">
+          <div class="slug-wrap">
+            <span class="slug-label">textshare.com / <b id="preview">—</b>&nbsp;</span>
+            <input type="text" id="code" placeholder="your-codename" autocomplete="off" spellcheck="false" maxlength="40"/>
+          </div>
+          <button class="share-btn" id="btn" onclick="share()">Share →</button>
+        </div>
+      </div>
+      <div class="fb" id="fb"></div>
+    </div>
+  </div>
+
+  <div class="foot">made with <span>♥</span> by utkarsh</div>
+
+</div>
+
+<script>
+  const codeEl = document.getElementById('code');
+  const preview = document.getElementById('preview');
+  const fb = document.getElementById('fb');
+  const btn = document.getElementById('btn');
+
+  codeEl.addEventListener('input', () => {
+    preview.textContent = codeEl.value.trim() || '—';
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === 'Enter') share();
+  });
+
+  async function share() {
+    const content = document.getElementById('content').value.trim();
+    const code = codeEl.value.trim();
+    setFb('', '');
+    if (!content || !code) return setFb('both fields are required.', 'err');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const res = await fetch('/api/paste', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, content })
+      });
+      const data = await res.json();
+      if (!res.ok) return setFb(data.error || 'something went wrong.', 'err');
+      const link = `${location.origin}/${data.codename}`;
+      setFb(link, 'ok', link);
+    } catch { setFb('network error.', 'err'); }
+    finally { btn.disabled = false; btn.textContent = 'Share →'; }
+  }
+
+  function setFb(msg, type, link) {
+    fb.className = 'fb';
+    fb.innerHTML = '';
+    if (!msg) return;
+    fb.classList.add('show', type);
+    const s = document.createElement('span'); s.textContent = msg;
+    fb.appendChild(s);
+    if (link) {
+      const c = document.createElement('button');
+      c.className = 'copy-btn'; c.textContent = 'copy';
+      c.onclick = () => { navigator.clipboard.writeText(link); c.textContent = 'copied!'; setTimeout(() => c.textContent = 'copy', 2000); };
+      fb.appendChild(c);
+    }
+  }
+</script>
+</body>
+</html>
